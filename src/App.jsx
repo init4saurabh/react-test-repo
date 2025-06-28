@@ -1,39 +1,76 @@
-import {Suspense,lazy} from "react";
-import { BrowserRouter, Routes ,Route, useNavigate} from "react-router-dom"
-const  Dashboard =lazy(()=> import("./components/Dashboard"))
-const   Landing = lazy(()=> import("./components/Landing"))
-function App(){
-  
+//With CountContext and SetCountContext :
+
+import { useContext, useState } from "react";
+import { CountContext, SetCountContext } from "../contexts/CountContext";
+
+/*
+
+        CountApp
+
+          Count       
+
+  Buttons     CountRender
+
+*/
+
+function CountApp() {
+  const [count, setCount] = useState(0);
+
+  return (
+    //TODO : wrap anyone that wants to use the teleported value insdide a provider
+
+    <div>
+      <CountContext.Provider value={count}>
+        <SetCountContext.Provider value={setCount}>
+          <Count />
+        </SetCountContext.Provider>
+      </CountContext.Provider>
+    </div>
+  );
+}
+
+//! -----------------------------
+
+function Count() {
   return (
     <div>
-      
-      <BrowserRouter>
-         <Appbar/>
-              <Routes>
-                <Route path ="/dashboard" element = {<Suspense fallback ={"loading..."}>
-                  <Dashboard/>
-                </Suspense>}/>
-                  <Route path ="/" element = {<Suspense fallback ={"loading..."}>
-                    <Landing />
-                  </Suspense>}/>
-              </Routes>
-          </BrowserRouter>
+      <CountRenderer />
+      <Buttons />
     </div>
-    
-  )
-}
-function Appbar(){
-  const navigate = useNavigate();
-     return <div>
-        <button onClick = {()=>{
-          navigate("/dashboard");
-        }}>Dashboard</button>
-
-         <button onClick = {()=>{
-          navigate("/");
-         }}>Landing</button>
-      </div>
+  );
 }
 
- 
-export default App
+//! -----------------------------
+
+function CountRenderer() {
+  const count = useContext(CountContext);
+  return <div>{count}</div>;
+}
+
+//! -----------------------------
+
+function Buttons() {
+  const setCount = useContext(SetCountContext);
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setCount((prevCount) => prevCount + 1);
+        }}
+      >
+        Increase
+      </button>
+
+      <button
+        onClick={() => {
+          setCount((prevCount) => prevCount - 1);
+        }}
+      >
+        Decrease
+      </button>
+    </div>
+  );
+}
+
+export default CountApp;
